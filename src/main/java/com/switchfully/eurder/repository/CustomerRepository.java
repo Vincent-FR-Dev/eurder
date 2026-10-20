@@ -10,11 +10,6 @@ public class CustomerRepository {
 
     private final Map<UUID, Customer> customers = new HashMap<>();
 
-
-    public CustomerRepository() {
-
-    }
-
     public Optional<Customer> getById(UUID id) {
         return Optional.ofNullable(customers.get(id));
     }

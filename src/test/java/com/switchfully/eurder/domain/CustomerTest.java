@@ -16,4 +16,9 @@ public class CustomerTest {
           assertThat(rudy.getId()).isNotEqualTo(karel.getId());
     }
 
+    @Test
+    void customerIdIsNotNull(){
+
+    }
+
 }

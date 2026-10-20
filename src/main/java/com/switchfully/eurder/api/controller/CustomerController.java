@@ -1,4 +1,4 @@
-package com.switchfully.eurder.api.Controller;
+package com.switchfully.eurder.api.controller;
 
 import com.switchfully.eurder.api.dto.CreateCustomerDto;
 import com.switchfully.eurder.api.dto.CustomerDto;
@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController

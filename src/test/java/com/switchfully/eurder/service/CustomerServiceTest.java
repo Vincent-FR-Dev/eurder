@@ -33,7 +33,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    void whenCustomerDoesNotExist_thenThrowsException() {
+    void whenCustomerDoesNotExist_thenThrowException() {
         assertThatThrownBy(() -> customerService.getCustomerById(rudy.getId())).isInstanceOf(CustomerNotFoundException.class);
     }
 

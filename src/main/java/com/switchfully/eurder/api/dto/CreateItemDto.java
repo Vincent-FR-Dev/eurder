@@ -7,5 +7,5 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
 
-public record CreateItemDto(@NotBlank String name, @NotBlank String description, @NotNull @Positive BigDecimal price, @NotNull @PositiveOrZero int stock) {
+public record CreateItemDto(@NotBlank String name, @NotBlank String description, @NotNull @Positive BigDecimal price, @PositiveOrZero int stock) {
 }

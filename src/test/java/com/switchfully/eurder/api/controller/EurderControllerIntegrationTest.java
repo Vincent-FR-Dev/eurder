@@ -31,7 +31,7 @@ public class EurderControllerIntegrationTest {
 
     private static UUID postCustomer() {
         AddressDto address = new AddressDto("Rue des loups", "2", "1000", "Bruxelles");
-        CreateCustomerDto customer = new CreateCustomerDto("Rudy", "Switchfully", "rudy@switchfully.com", address, "0472548963");
+        CreateCustomerDto customer = new CreateCustomerDto("Rudy", "Switchfully", "rudy@switchfully.com", address, "0472548963", "password123");
         String id = given()
                 .contentType(ContentType.JSON)
                 .body(customer)

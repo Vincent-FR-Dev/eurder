@@ -28,7 +28,7 @@ public class CustomerControllerIntegrationTest {
 
     private static CreateCustomerDto customerWithEmail(String email) {
         AddressDto address = new AddressDto("Rue des loups", "2", "1000", "Bruxelles");
-        return new CreateCustomerDto("Rudy", "Switchfully", email, address, "0472548963");
+        return new CreateCustomerDto("Rudy", "Switchfully", email, address, "0472548963", "password123");
     }
 
     private static String postCustomer(String email) {

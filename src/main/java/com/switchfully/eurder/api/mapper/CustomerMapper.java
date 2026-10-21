@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class CustomerMapper {
 
     public Customer toCustomer(CreateCustomerDto dto) {
-        return new Customer(dto.firstname(), dto.lastname(), dto.email(), toAddress(dto.address()), dto.phoneNumber());
+        return new Customer(dto.firstname(), dto.lastname(), dto.email(), toAddress(dto.address()), dto.phoneNumber(), dto.password());
     }
 
     public CustomerDto toCustomerDto(Customer customer) {

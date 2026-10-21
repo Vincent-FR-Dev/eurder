@@ -21,7 +21,7 @@ public class CustomerServiceTest {
         customerRepository = new CustomerRepository();
         customerService = new CustomerService(customerRepository);
         Address address = new Address("Rue des loups", "2", "1000", "Bruxelles");
-        rudy = new Customer("Rudy", "Switchfully", "rudy@switchfully.com", address, "0472548963");
+        rudy = new Customer("Rudy", "Switchfully", "rudy@switchfully.com", address, "0472548963", "password123");
 
     }
 

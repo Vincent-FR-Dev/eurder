@@ -10,14 +10,16 @@ public class Customer {
     private String email;
     private Address address;
     private String phoneNumber;
+    private String password;
 
-    public Customer(String firstname, String lastname, String email, Address address, String phoneNumber) {
+    public Customer(String firstname, String lastname, String email, Address address, String phoneNumber, String password) {
         this.id = UUID.randomUUID();
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.address = address;
         this.phoneNumber = phoneNumber;
+        this.password = password;
     }
 
     public UUID getId() {
@@ -35,6 +37,8 @@ public class Customer {
     public String getEmail() {
         return email;
     }
+
+    public String getPassword() {return password; }
 
     public Address getAddress() {
         return address;

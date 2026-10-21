@@ -44,7 +44,7 @@ public class EurderServiceTest {
         eurderService = new EurderService(eurderRepository, customerService, itemService);
 
         rudy = new Customer("Rudy", "Switchfully", "rudy@switchfully.com",
-                new Address("Rue des loups", "2", "1000", "Bruxelles"), "0472548963");
+                new Address("Rue des loups", "2", "1000", "Bruxelles"), "0472548963", "password123");
         bike = new Item("VTT", "Sport Bike", new BigDecimal("350.00"), 10);
         customerRepository.save(rudy);
         itemRepository.save(bike);

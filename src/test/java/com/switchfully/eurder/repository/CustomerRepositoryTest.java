@@ -19,8 +19,8 @@ public class CustomerRepositoryTest {
     void setUp() {
         customerRepository = new CustomerRepository();
         Address address = new Address("Rue des loups", "2", "1000", "Bruxelles");
-        rudy = new Customer("Rudy", "Switchfully", "rudy@switchfully.com", address, "0472548963");
-        karel = new Customer("Karel", "Switchfully", "karel@switchfully.com", address, "0472548123");
+        rudy = new Customer("Rudy", "Switchfully", "rudy@switchfully.com", address, "0472548963", "password123");
+        karel = new Customer("Karel", "Switchfully", "karel@switchfully.com", address, "0472548123", "password123");
     }
 
     @Test
@@ -42,5 +42,19 @@ public class CustomerRepositoryTest {
         customerRepository.save(karel);
         List<Customer> result = customerRepository.getAll();
         assertThat(result).containsExactlyInAnyOrder(karel, rudy);
+    }
+
+    @Test
+    void findCustomerByEmail_whenCustomerIsSaved(){
+        customerRepository.save(rudy);
+        Optional<Customer> result = customerRepository.getByEmail(rudy.getEmail());
+        assertThat(result).contains(rudy);
+    }
+
+    @Test
+    void findCustomerByEmail_whenEmailIsUnknown_returnsEmpty() {
+        customerRepository.save(rudy);
+        Optional<Customer> result = customerRepository.getByEmail("unknown@switchfully.com");
+        assertThat(result).isEmpty();
     }
 }

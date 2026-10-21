@@ -14,6 +14,12 @@ public class CustomerRepository {
         return Optional.ofNullable(customers.get(id));
     }
 
+    public Optional<Customer> getByEmail(String email) {
+        return customers.values().stream()
+                                .filter(customer -> customer.getEmail().equals(email))
+                                .findFirst();
+    }
+
     public Customer save(Customer customer) {
         customers.put(customer.getId(), customer);
         return customer;

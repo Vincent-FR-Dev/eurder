@@ -15,6 +15,8 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class EurderControllerIntegrationTest {
@@ -48,6 +50,18 @@ public class EurderControllerIntegrationTest {
                 .body(item)
                 .when()
                 .post("/items")
+                .then()
+                .statusCode(201)
+                .extract().path("id");
+        return UUID.fromString(id);
+    }
+
+    private static UUID postEurder(UUID customerId, UUID itemId) {
+        String id = given()
+                .contentType(ContentType.JSON)
+                .body(eurderWith(customerId, itemId, 2))
+                .when()
+                .post("/eurders")
                 .then()
                 .statusCode(201)
                 .extract().path("id");
@@ -111,5 +125,46 @@ public class EurderControllerIntegrationTest {
                 .post("/eurders")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    void whenReorderIsValid_returns201(){
+        UUID customerId = postCustomer();
+        UUID itemId = postItem("350.00", 5);
+        UUID eurderId = postEurder(customerId, itemId);
+
+        given().contentType(ContentType.JSON)
+                .body(new ReorderDto(customerId))
+                .when()
+                .post("/eurders/" + eurderId + "/reorder")
+                .then()
+                .statusCode(201)
+                .body("id", not(equalTo(eurderId.toString())));
+    }
+
+    @Test
+    void whenReorderWantToReorderAnUnknownEurder_returns404(){
+        UUID customerId = postCustomer();
+
+        given().contentType(ContentType.JSON)
+                .body(new ReorderDto(customerId))
+                .when()
+                .post("/eurders/" + UUID.randomUUID() + "/reorder")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void whenReorderWantToReorderWithBadCustomerId_returns403(){
+        UUID customerId = postCustomer();
+        UUID itemId = postItem("350.00", 5);
+        UUID eurderId = postEurder(customerId, itemId);
+
+        given().contentType(ContentType.JSON)
+                .body(new ReorderDto(UUID.randomUUID()))
+                .when()
+                .post("/eurders/" + eurderId + "/reorder")
+                .then()
+                .statusCode(403);
     }
 }

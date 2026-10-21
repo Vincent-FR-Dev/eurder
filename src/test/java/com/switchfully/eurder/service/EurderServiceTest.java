@@ -13,6 +13,7 @@ import com.switchfully.eurder.repository.EurderRepository;
 import com.switchfully.eurder.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,7 +40,7 @@ public class EurderServiceTest {
         customerRepository = new CustomerRepository();
         itemRepository = new ItemRepository();
         eurderRepository = new EurderRepository();
-        customerService = new CustomerService(customerRepository);
+        customerService = new CustomerService(customerRepository, new BCryptPasswordEncoder());
         itemService = new ItemService(itemRepository);
         eurderService = new EurderService(eurderRepository, customerService, itemService);
 

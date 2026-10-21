@@ -47,4 +47,8 @@ public class Customer {
     public String getPhoneNumber() {
         return phoneNumber;
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

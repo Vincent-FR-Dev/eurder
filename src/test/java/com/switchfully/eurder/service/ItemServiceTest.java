@@ -21,7 +21,7 @@ public class ItemServiceTest {
     void setUp() {
         itemRepository = new ItemRepository();
         itemService = new ItemService(itemRepository);
-        item = new Item("VTT", "Sport Bike", new BigDecimal("350.00") , 10);
+        item = new Item("VTT", "Sport Bike", new BigDecimal("350.00"), 10);
     }
 
     @Test
@@ -32,7 +32,15 @@ public class ItemServiceTest {
     }
 
     @Test
-    void whenItemDoesntExist_thenThrowException(){
-        assertThatThrownBy(() -> itemService.getItemById(item.getId())).isInstanceOf(ItemNotFoundException.class);
+    void whenItemDoesntExist_thenThrowException() {
+        assertThatThrownBy(() -> itemService.getItemById(item.getId()))
+                .isInstanceOf(ItemNotFoundException.class);
+    }
+
+    @Test
+    void whenItemExists_updatesItem() {
+        itemRepository.save(item);
+        Item result = itemService.updateItem(item.getId(), "Car", "Sport Car", new BigDecimal("25000.00"), 3);
+        assertThat(result.getPrice()).isEqualByComparingTo(new BigDecimal("25000.00"));
     }
 }

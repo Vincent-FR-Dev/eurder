@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/items")
 public class ItemController {
@@ -27,6 +29,13 @@ public class ItemController {
         Item item = itemMapper.toItem(createItemDto);
         Item createdItem = itemService.createItem(item);
         return itemMapper.toItemDto(createdItem);
+    }
 
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDto updateItem(@PathVariable UUID id, @RequestBody @Valid CreateItemDto createItemDto) {
+        Item item = itemService.updateItem(id, createItemDto.name(), createItemDto.description(),
+                createItemDto.price(), createItemDto.stock());
+        return itemMapper.toItemDto(item);
     }
 }

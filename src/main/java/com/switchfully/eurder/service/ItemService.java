@@ -5,6 +5,7 @@ import com.switchfully.eurder.exception.ItemNotFoundException;
 import com.switchfully.eurder.repository.ItemRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -22,5 +23,11 @@ public class ItemService {
 
     public Item getItemById(UUID id) {
         return itemRepository.getById(id).orElseThrow(() -> new ItemNotFoundException(id));
+    }
+
+    public Item updateItem(UUID id, String name, String description, BigDecimal price, int stock) {
+        Item item = getItemById(id);
+        item.update(name, description, price, stock);
+        return item;
     }
 }

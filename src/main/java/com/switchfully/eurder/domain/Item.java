@@ -5,12 +5,11 @@ import java.util.UUID;
 
 public class Item {
 
-    private UUID id;
+    private final UUID id;
     private String name;
     private String description;
     private BigDecimal price;
     private int stock;
-
 
     public Item(String name, String description, BigDecimal price, int stock) {
         this.id = UUID.randomUUID();
@@ -20,6 +19,12 @@ public class Item {
         this.stock = stock;
     }
 
+    public void update(String name, String description, BigDecimal price, int stock) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+    }
 
     public UUID getId() {
         return id;

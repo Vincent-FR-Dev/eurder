@@ -1,7 +1,7 @@
 package com.switchfully.eurder.api.controller;
 
-
 import com.switchfully.eurder.api.dto.*;
+import com.switchfully.eurder.security.SecurityConfig;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +21,8 @@ import static org.hamcrest.Matchers.not;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class EurderControllerIntegrationTest {
 
+    private static final String PASSWORD = "password123";
+
     @LocalServerPort
     private int port;
 
@@ -29,23 +31,24 @@ public class EurderControllerIntegrationTest {
         RestAssured.port = port;
     }
 
-    private static UUID postCustomer() {
+    private static String postCustomer() {
+        String email = "customer." + UUID.randomUUID() + "@switchfully.com";
         AddressDto address = new AddressDto("Rue des loups", "2", "1000", "Bruxelles");
-        CreateCustomerDto customer = new CreateCustomerDto("Rudy", "Switchfully", "rudy@switchfully.com", address, "0472548963", "password123");
-        String id = given()
+        CreateCustomerDto customer = new CreateCustomerDto("Rudy", "Switchfully", email, address, "0472548963", PASSWORD);
+        given()
                 .contentType(ContentType.JSON)
                 .body(customer)
                 .when()
                 .post("/customers")
                 .then()
-                .statusCode(201)
-                .extract().path("id");
-        return UUID.fromString(id);
+                .statusCode(201);
+        return email;
     }
 
     private static UUID postItem(String price, int stock) {
         CreateItemDto item = new CreateItemDto("VTT", "Sport Bike", new BigDecimal(price), stock);
         String id = given()
+                .auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
                 .contentType(ContentType.JSON)
                 .body(item)
                 .when()
@@ -56,10 +59,15 @@ public class EurderControllerIntegrationTest {
         return UUID.fromString(id);
     }
 
-    private static UUID postEurder(UUID customerId, UUID itemId) {
+    private static CreateEurderDto eurderWith(UUID itemId, int quantity) {
+        return new CreateEurderDto(List.of(new CreateItemGroupDto(itemId, quantity)));
+    }
+
+    private static UUID postEurder(String customerEmail, UUID itemId) {
         String id = given()
+                .auth().preemptive().basic(customerEmail, PASSWORD)
                 .contentType(ContentType.JSON)
-                .body(eurderWith(customerId, itemId, 2))
+                .body(eurderWith(itemId, 2))
                 .when()
                 .post("/eurders")
                 .then()
@@ -68,59 +76,59 @@ public class EurderControllerIntegrationTest {
         return UUID.fromString(id);
     }
 
-    private static CreateEurderDto eurderWith(UUID customerId, UUID itemId, int quantity) {
-        return new CreateEurderDto(customerId, List.of(new CreateItemGroupDto(itemId, quantity)));
-    }
-
     @Test
-    void whenEurderIsValid_returns201(){
-        UUID customerId = postCustomer();
+    void whenEurderIsValid_returns201() {
+        String email = postCustomer();
         UUID itemId = postItem("350.00", 5);
 
-        double totalPrice = given().contentType(ContentType.JSON)
-                .body(eurderWith(customerId, itemId, 2))
+        double totalPrice = given()
+                .auth().preemptive().basic(email, PASSWORD)
+                .contentType(ContentType.JSON)
+                .body(eurderWith(itemId, 2))
                 .when()
                 .post("/eurders")
                 .then()
                 .statusCode(201)
                 .extract().jsonPath().getDouble("totalPrice");
 
-        assertThat(totalPrice).isEqualTo(700.00);
+        assertThat(totalPrice).isEqualTo(700.0);
     }
 
     @Test
-    void whenCustomerIsUnknown_returns404(){
-        UUID customerId = UUID.randomUUID();
+    void whenNotAuthenticated_returns401() {
         UUID itemId = postItem("350.00", 5);
 
-        given().contentType(ContentType.JSON)
-                .body(eurderWith(customerId, itemId, 4))
+        given()
+                .contentType(ContentType.JSON)
+                .body(eurderWith(itemId, 2))
+                .when()
+                .post("/eurders")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void whenItemIsUnknown_returns404() {
+        String email = postCustomer();
+
+        given()
+                .auth().preemptive().basic(email, PASSWORD)
+                .contentType(ContentType.JSON)
+                .body(eurderWith(UUID.randomUUID(), 2))
                 .when()
                 .post("/eurders")
                 .then()
                 .statusCode(404);
-
     }
 
     @Test
-    void whenItemIsUnknown_returns404(){
-        UUID customerId = postCustomer();
-        UUID itemId = UUID.randomUUID();
+    void whenEurderIsEmpty_returns400() {
+        String email = postCustomer();
 
-        given().contentType(ContentType.JSON)
-                .body(eurderWith(customerId, itemId, 2))
-                .when()
-                .post("/eurders")
-                .then()
-                .statusCode(404);
-    }
-
-    @Test
-    void whenEurderIsEmpty_returns400(){
-        UUID customerId = postCustomer();
-
-        given().contentType(ContentType.JSON)
-                .body(new CreateEurderDto(customerId, List.of()))
+        given()
+                .auth().preemptive().basic(email, PASSWORD)
+                .contentType(ContentType.JSON)
+                .body(new CreateEurderDto(List.of()))
                 .when()
                 .post("/eurders")
                 .then()
@@ -128,13 +136,13 @@ public class EurderControllerIntegrationTest {
     }
 
     @Test
-    void whenReorderIsValid_returns201(){
-        UUID customerId = postCustomer();
+    void whenReorderIsValid_returns201() {
+        String email = postCustomer();
         UUID itemId = postItem("350.00", 5);
-        UUID eurderId = postEurder(customerId, itemId);
+        UUID eurderId = postEurder(email, itemId);
 
-        given().contentType(ContentType.JSON)
-                .body(new ReorderDto(customerId))
+        given()
+                .auth().preemptive().basic(email, PASSWORD)
                 .when()
                 .post("/eurders/" + eurderId + "/reorder")
                 .then()
@@ -143,11 +151,11 @@ public class EurderControllerIntegrationTest {
     }
 
     @Test
-    void whenReorderWantToReorderAnUnknownEurder_returns404(){
-        UUID customerId = postCustomer();
+    void whenReorderingUnknownEurder_returns404() {
+        String email = postCustomer();
 
-        given().contentType(ContentType.JSON)
-                .body(new ReorderDto(customerId))
+        given()
+                .auth().preemptive().basic(email, PASSWORD)
                 .when()
                 .post("/eurders/" + UUID.randomUUID() + "/reorder")
                 .then()
@@ -155,13 +163,14 @@ public class EurderControllerIntegrationTest {
     }
 
     @Test
-    void whenReorderWantToReorderWithBadCustomerId_returns403(){
-        UUID customerId = postCustomer();
+    void whenReorderingEurderOfAnotherCustomer_returns403() {
+        String ownerEmail = postCustomer();
+        String otherEmail = postCustomer();
         UUID itemId = postItem("350.00", 5);
-        UUID eurderId = postEurder(customerId, itemId);
+        UUID eurderId = postEurder(ownerEmail, itemId);
 
-        given().contentType(ContentType.JSON)
-                .body(new ReorderDto(UUID.randomUUID()))
+        given()
+                .auth().preemptive().basic(otherEmail, PASSWORD)
                 .when()
                 .post("/eurders/" + eurderId + "/reorder")
                 .then()

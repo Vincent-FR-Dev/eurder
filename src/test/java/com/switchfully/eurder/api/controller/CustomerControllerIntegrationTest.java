@@ -2,6 +2,7 @@ package com.switchfully.eurder.api.controller;
 
 import com.switchfully.eurder.api.dto.AddressDto;
 import com.switchfully.eurder.api.dto.CreateCustomerDto;
+import com.switchfully.eurder.security.SecurityConfig;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +80,8 @@ public class CustomerControllerIntegrationTest {
         postCustomer("rudy@switchfully.com");
         postCustomer("karel@switchfully.com");
 
-        given().when()
+        given().auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
+                .when()
                 .get("/customers")
                 .then()
                 .statusCode(200)
@@ -90,7 +92,8 @@ public class CustomerControllerIntegrationTest {
     void getCustomerById_whenCustomerExists_returns200(){
         String id = postCustomer("rudy@switchfully.com");
 
-        given().when()
+        given().auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
+                .when()
                 .get("/customers/" + id)
                 .then()
                 .statusCode(200)
@@ -100,7 +103,8 @@ public class CustomerControllerIntegrationTest {
 
     @Test
     void getCustomerById_whenCustomerDoesNotExist_returns404(){
-        given().when()
+        given().auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
+                .when()
                 .get("/customers/" + UUID.randomUUID())
                 .then()
                 .statusCode(404);

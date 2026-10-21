@@ -32,4 +32,9 @@ public class CustomerService {
     public Customer getCustomerById(UUID id) {
         return customerRepository.getById(id).orElseThrow(() -> new CustomerNotFoundException(id));
     }
+
+    public Customer getCustomerByEmail(String email) {
+        return customerRepository.getByEmail(email)
+                .orElseThrow(() -> new CustomerNotFoundException(email));
+    }
 }

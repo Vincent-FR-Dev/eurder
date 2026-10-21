@@ -1,6 +1,7 @@
 package com.switchfully.eurder.api.controller;
 
 import com.switchfully.eurder.api.dto.CreateItemDto;
+import com.switchfully.eurder.security.SecurityConfig;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ public class ItemControllerIntegrationTest {
 
     private static UUID postItem() {
         String id = given()
+                .auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
                 .contentType(ContentType.JSON)
                 .body(itemWithPrice(new BigDecimal("350.00")))
                 .when()
@@ -44,7 +46,8 @@ public class ItemControllerIntegrationTest {
 
     @Test
     void createItem_withValidPrice_returns201() {
-        given().contentType(ContentType.JSON)
+        given().auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
+                .contentType(ContentType.JSON)
                 .body(itemWithPrice(new BigDecimal("1000.00")))
                 .when()
                 .post("/items")
@@ -55,7 +58,8 @@ public class ItemControllerIntegrationTest {
 
     @Test
     void createItem_withInvalidPrice_returns400() {
-        given().contentType(ContentType.JSON)
+        given().auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
+                .contentType(ContentType.JSON)
                 .body(itemWithPrice(new BigDecimal("0")))
                 .when()
                 .post("/items")
@@ -67,7 +71,8 @@ public class ItemControllerIntegrationTest {
     void updateItem_withValidData_returns200() {
         UUID id = postItem();
 
-        double price = given().contentType(ContentType.JSON)
+        double price = given().auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
+                .contentType(ContentType.JSON)
                 .body(itemWithPrice(new BigDecimal("500.00")))
                 .when()
                 .put("/items/" + id)
@@ -80,7 +85,8 @@ public class ItemControllerIntegrationTest {
 
     @Test
     void updateItem_withUnknownId_returns404() {
-        given().contentType(ContentType.JSON)
+        given().auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
+                .contentType(ContentType.JSON)
                 .body(itemWithPrice(new BigDecimal("500.00")))
                 .when()
                 .put("/items/" + UUID.randomUUID())

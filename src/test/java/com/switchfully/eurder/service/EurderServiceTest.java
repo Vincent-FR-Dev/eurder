@@ -5,7 +5,9 @@ import com.switchfully.eurder.domain.Customer;
 import com.switchfully.eurder.domain.Eurder;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.exception.CustomerNotFoundException;
+import com.switchfully.eurder.exception.EurderNotFoundException;
 import com.switchfully.eurder.exception.ItemNotFoundException;
+import com.switchfully.eurder.exception.NotOwnerOfEurderException;
 import com.switchfully.eurder.repository.CustomerRepository;
 import com.switchfully.eurder.repository.EurderRepository;
 import com.switchfully.eurder.repository.ItemRepository;
@@ -65,5 +67,44 @@ public class EurderServiceTest {
     @Test
     void createEurder_withUnknownItemGroupId_throwsException() {
         assertThatThrownBy(() -> eurderService.createEurder(rudy.getId(), List.of(new ItemGroupRequest(UUID.randomUUID(), 2)))).isInstanceOf(ItemNotFoundException.class);
+    }
+
+    @Test
+    void reorder_createsNewEurderWithSameItems(){
+        List<ItemGroupRequest> requests = List.of(new ItemGroupRequest(bike.getId(), 2));
+
+        Eurder eurder = eurderService.createEurder(rudy.getId(), requests);
+        Eurder reorder = eurderService.reorder(eurder.getId(), rudy.getId());
+
+        assertThat(reorder.getId()).isNotEqualTo(eurder.getId());
+        assertThat(reorder.getItemGroups()).hasSize(1);
+        assertThat(reorder.getItemGroups().get(0).getItemId()).isEqualTo(bike.getId());
+        assertThat(reorder.getItemGroups().get(0).getQuantity()).isEqualTo(2);
+    }
+
+    @Test
+    void reorderWillUseTheUpdatePrice(){
+        List<ItemGroupRequest> requests = List.of(new ItemGroupRequest(bike.getId(), 2));
+
+        Eurder eurder = eurderService.createEurder(rudy.getId(), requests);
+        itemService.updateItem(bike.getId(), bike.getName(), bike.getDescription(), new BigDecimal("600.00"), bike.getStock());
+        Eurder reorder = eurderService.reorder(eurder.getId(), rudy.getId());
+
+        assertThat(reorder.getTotalPrice()).isEqualByComparingTo(new BigDecimal("1200.00"));
+        assertThat(eurder.getTotalPrice()).isEqualByComparingTo(new BigDecimal("700.00"));
+    }
+
+    @Test
+    void reorder_withUnknownEurderId_throwsException(){
+        assertThatThrownBy(() -> eurderService.reorder(UUID.randomUUID(), rudy.getId())).isInstanceOf(EurderNotFoundException.class);
+    }
+
+    @Test
+    void reorder_withBadCustomerId_throwsException(){
+        List<ItemGroupRequest> requests = List.of(new ItemGroupRequest(bike.getId(), 2));
+
+        Eurder eurder = eurderService.createEurder(rudy.getId(), requests);
+
+        assertThatThrownBy(() -> eurderService.reorder(eurder.getId(), UUID.randomUUID())).isInstanceOf(NotOwnerOfEurderException.class);
     }
 }

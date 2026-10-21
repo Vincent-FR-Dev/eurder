@@ -2,6 +2,8 @@ package com.switchfully.eurder.service;
 
 import com.switchfully.eurder.domain.Eurder;
 import com.switchfully.eurder.domain.ItemGroup;
+import com.switchfully.eurder.exception.EurderNotFoundException;
+import com.switchfully.eurder.exception.NotOwnerOfEurderException;
 import com.switchfully.eurder.repository.EurderRepository;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,16 @@ public class EurderService {
         Eurder eurder = new Eurder(customerId, itemGroups);
         return eurderRepository.save(eurder);
 
+    }
+
+    public Eurder reorder(UUID eurderId, UUID customerId) {
+        Eurder eurder = eurderRepository.getById(eurderId).orElseThrow(() -> new EurderNotFoundException(eurderId));
+        if (!eurder.getCustomerId().equals(customerId)) {
+            throw new NotOwnerOfEurderException(eurderId, customerId);
+        }
+
+        List<ItemGroupRequest> requests = eurder.getItemGroups().stream().map(itemGroup -> new ItemGroupRequest(itemGroup.getItemId(), itemGroup.getQuantity())).toList();
+        return createEurder(customerId, requests);
     }
 }
 

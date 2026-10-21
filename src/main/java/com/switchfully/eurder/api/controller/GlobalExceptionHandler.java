@@ -2,7 +2,9 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dto.ErrorDto;
 import com.switchfully.eurder.exception.CustomerNotFoundException;
+import com.switchfully.eurder.exception.EurderNotFoundException;
 import com.switchfully.eurder.exception.ItemNotFoundException;
+import com.switchfully.eurder.exception.NotOwnerOfEurderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,11 +22,18 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler({CustomerNotFoundException.class, ItemNotFoundException.class})
+    @ExceptionHandler({CustomerNotFoundException.class, ItemNotFoundException.class, EurderNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorDto handleNotFound(RuntimeException exception) {
         log.warn("Resource not found: {}", exception.getMessage());
         return new ErrorDto(404, exception.getMessage());
+    }
+
+    @ExceptionHandler({NotOwnerOfEurderException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorDto handleForbidden(RuntimeException exception) {
+        log.warn("Forbidden action: {}", exception.getMessage());
+        return new ErrorDto(403, exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

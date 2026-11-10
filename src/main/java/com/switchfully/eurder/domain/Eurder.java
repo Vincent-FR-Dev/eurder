@@ -1,19 +1,40 @@
 package com.switchfully.eurder.domain;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@Entity
+@Table(name = "eurder")
 public class Eurder {
 
-    private final UUID id;
-    private final UUID customerId;
-    private final List<ItemGroup> itemGroups;
+    @Id
+    private UUID id;
+    private UUID customerId;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "item_group", joinColumns = @JoinColumn(name = "eurder_id"))
+    @OrderColumn(name = "line_number")
+    private List<ItemGroup> itemGroups = new ArrayList<>();
+
+    protected Eurder() {
+    }
 
     public Eurder(UUID customerId, List<ItemGroup> itemGroups){
         this.id = UUID.randomUUID();
         this.customerId = customerId;
-        this.itemGroups = List.copyOf(itemGroups);
+        this.itemGroups = new ArrayList<>(itemGroups);
     }
 
     public UUID getId() {
@@ -25,7 +46,7 @@ public class Eurder {
     }
 
     public List<ItemGroup> getItemGroups() {
-        return itemGroups;
+        return Collections.unmodifiableList(itemGroups);
     }
 
     public BigDecimal getTotalPrice() {

@@ -1,15 +1,21 @@
 package com.switchfully.eurder.domain;
 
+import jakarta.persistence.Embeddable;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+@Embeddable
 public class ItemGroup {
 
-    private final UUID itemId;
-    private final int quantity;
-    private final BigDecimal price;
-    private final LocalDate shippingDate;
+    private UUID itemId;
+    private int quantity;
+    private BigDecimal price;
+    private LocalDate shippingDate;
+
+    protected ItemGroup() {
+    }
 
     public ItemGroup(Item item, int quantity, LocalDate orderDate) {
         this.itemId = item.getId();

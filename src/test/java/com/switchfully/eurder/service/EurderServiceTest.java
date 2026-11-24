@@ -9,11 +9,12 @@ import com.switchfully.eurder.exception.EurderNotFoundException;
 import com.switchfully.eurder.exception.ItemNotFoundException;
 import com.switchfully.eurder.exception.NotOwnerOfEurderException;
 import com.switchfully.eurder.repository.CustomerRepository;
-import com.switchfully.eurder.repository.EurderRepository;
 import com.switchfully.eurder.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,14 +23,18 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SpringBootTest
+@Transactional
 public class EurderServiceTest {
 
+    @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
     private ItemRepository itemRepository;
-    private EurderRepository eurderRepository;
 
+    @Autowired
     private ItemService itemService;
-    private CustomerService customerService;
+    @Autowired
     private EurderService eurderService;
 
     private Customer rudy;
@@ -37,13 +42,6 @@ public class EurderServiceTest {
 
     @BeforeEach
     public void setUp() {
-        customerRepository = new CustomerRepository();
-        itemRepository = new ItemRepository();
-        eurderRepository = new EurderRepository();
-        customerService = new CustomerService(customerRepository, new BCryptPasswordEncoder());
-        itemService = new ItemService(itemRepository);
-        eurderService = new EurderService(eurderRepository, customerService, itemService);
-
         rudy = new Customer("Rudy", "Switchfully", "rudy@switchfully.com",
                 new Address("Rue des loups", "2", "1000", "Bruxelles"), "0472548963", "password123");
         bike = new Item("VTT", "Sport Bike", new BigDecimal("350.00"), 10);

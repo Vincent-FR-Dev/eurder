@@ -6,6 +6,7 @@ import com.switchfully.eurder.exception.EurderNotFoundException;
 import com.switchfully.eurder.exception.NotOwnerOfEurderException;
 import com.switchfully.eurder.repository.EurderRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -51,6 +52,7 @@ public class EurderService {
      * 3. Créer l'Eurder avec ces ItemGroup, la sauvegarder et la renvoyer.
      */
 
+    @Transactional
     public Eurder createEurder(UUID customerId, List<ItemGroupRequest> requests) {
         customerService.getCustomerById(customerId);
         LocalDate orderDate = LocalDate.now();
@@ -64,8 +66,9 @@ public class EurderService {
 
     }
 
+    @Transactional
     public Eurder reorder(UUID eurderId, UUID customerId) {
-        Eurder eurder = eurderRepository.getById(eurderId).orElseThrow(() -> new EurderNotFoundException(eurderId));
+        Eurder eurder = eurderRepository.findById(eurderId).orElseThrow(() -> new EurderNotFoundException(eurderId));
         if (!eurder.getCustomerId().equals(customerId)) {
             throw new NotOwnerOfEurderException(eurderId, customerId);
         }

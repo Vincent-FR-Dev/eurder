@@ -1,34 +1,14 @@
 package com.switchfully.eurder.repository;
 
 import com.switchfully.eurder.domain.Customer;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
-@Repository
-public class CustomerRepository {
+public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
-    private final Map<UUID, Customer> customers = new HashMap<>();
+    Optional<Customer> findByEmail(String email);
 
-    public Optional<Customer> getById(UUID id) {
-        return Optional.ofNullable(customers.get(id));
-    }
-
-    public Optional<Customer> getByEmail(String email) {
-        return customers.values().stream()
-                                .filter(customer -> customer.getEmail().equals(email))
-                                .findFirst();
-    }
-
-    public Customer save(Customer customer) {
-        customers.put(customer.getId(), customer);
-        return customer;
-    }
-
-    public List<Customer> getAll() {
-        return customers.values().stream().toList();
-    }
-
-
-
+    boolean existsByEmail(String email);
 }

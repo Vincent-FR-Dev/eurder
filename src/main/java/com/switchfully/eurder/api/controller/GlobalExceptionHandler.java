@@ -2,6 +2,7 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dto.ErrorDto;
 import com.switchfully.eurder.exception.CustomerNotFoundException;
+import com.switchfully.eurder.exception.EmailAlreadyUsedException;
 import com.switchfully.eurder.exception.EurderNotFoundException;
 import com.switchfully.eurder.exception.ItemNotFoundException;
 import com.switchfully.eurder.exception.NotOwnerOfEurderException;
@@ -34,6 +35,13 @@ public class GlobalExceptionHandler {
     public ErrorDto handleForbidden(RuntimeException exception) {
         log.warn("Forbidden action: {}", exception.getMessage());
         return new ErrorDto(403, exception.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyUsedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorDto handleConflict(EmailAlreadyUsedException exception) {
+        log.warn("Conflict: {}", exception.getMessage());
+        return new ErrorDto(409, exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

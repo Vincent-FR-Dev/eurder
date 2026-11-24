@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .roles(Role.ADMIN.name())
                         .build();
             }
-            return customerRepository.getByEmail(email)
+            return customerRepository.findByEmail(email)
                     .map(customer -> User.withUsername(customer.getEmail())
                             .password(customer.getPassword())
                             .roles(Role.CUSTOMER.name())

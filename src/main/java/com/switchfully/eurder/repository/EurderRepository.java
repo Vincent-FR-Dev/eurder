@@ -1,25 +1,11 @@
 package com.switchfully.eurder.repository;
 
 import com.switchfully.eurder.domain.Eurder;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
-@Repository
-public class EurderRepository {
+public interface EurderRepository extends JpaRepository<Eurder, UUID> {
 
-    private final Map<UUID, Eurder> eurders = new HashMap<>();
-
-    public Optional<Eurder> getById(UUID id) {
-        return Optional.ofNullable(eurders.get(id));
-    }
-
-    public Eurder save(Eurder eurder) {
-        eurders.put(eurder.getId(), eurder);
-        return eurder;
-    }
 
 }

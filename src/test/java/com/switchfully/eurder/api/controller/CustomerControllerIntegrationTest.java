@@ -32,6 +32,10 @@ public class CustomerControllerIntegrationTest {
         return new CreateCustomerDto("Rudy", "Switchfully", email, address, "0472548963", "password123");
     }
 
+    private static String uniqueEmail() {
+        return "customer." + UUID.randomUUID() + "@switchfully.com";
+    }
+
     private static String postCustomer(String email) {
         return given()
                 .contentType(ContentType.JSON)
@@ -47,12 +51,25 @@ public class CustomerControllerIntegrationTest {
     @Test
     void createCustomer_withValidData_returns201(){
         given().contentType(ContentType.JSON)
-                .body(customerWithEmail("rudy@switchfully.com"))
+                .body(customerWithEmail(uniqueEmail()))
                 .when()
                 .post("/customers")
                 .then()
                 .statusCode(201)
                 .body("id", notNullValue());
+    }
+
+    @Test
+    void createCustomer_withEmailAlreadyUsed_returns409(){
+        String email = uniqueEmail();
+        postCustomer(email);
+
+        given().contentType(ContentType.JSON)
+                .body(customerWithEmail(email))
+                .when()
+                .post("/customers")
+                .then()
+                .statusCode(409);
     }
 
     @Test
@@ -77,8 +94,8 @@ public class CustomerControllerIntegrationTest {
 
     @Test
     void getAllCustomers_returns200(){
-        postCustomer("rudy@switchfully.com");
-        postCustomer("karel@switchfully.com");
+        postCustomer(uniqueEmail());
+        postCustomer(uniqueEmail());
 
         given().auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
                 .when()
@@ -90,7 +107,7 @@ public class CustomerControllerIntegrationTest {
 
     @Test
     void getCustomerById_whenCustomerExists_returns200(){
-        String id = postCustomer("rudy@switchfully.com");
+        String id = postCustomer(uniqueEmail());
 
         given().auth().preemptive().basic(SecurityConfig.ADMIN_EMAIL, SecurityConfig.ADMIN_PASSWORD)
                 .when()
